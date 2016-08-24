@@ -2,8 +2,6 @@ from __future__ import unicode_literals
 
 import threading
 
-from mezzanine.utils.deprecation import MiddlewareMixin
-
 
 _thread_local = threading.local()
 
@@ -15,7 +13,7 @@ def current_request():
     return getattr(_thread_local, "request", None)
 
 
-class CurrentRequestMiddleware(MiddlewareMixin):
+class CurrentRequestMiddleware(object):
     """
     Stores the request in the current thread for global access.
     """

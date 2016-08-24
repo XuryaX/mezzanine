@@ -38,7 +38,7 @@ jQuery(function($) {
 
     var itemSelector = window.__grappelli_installed ? '.items' : 'tbody';
     var parentSelector = '.inline-group ' + itemSelector;
-    var orderSelector = '._order input, .field-_order input';
+    var orderSelector = window.__grappelli_installed ? '._order input' : '.field-_order input';
 
     // Apply drag and drop to orderable inlines.
     $(parentSelector).sortable({handle: '.ordering', axis: 'y', opacity: '.7',
@@ -48,13 +48,8 @@ jQuery(function($) {
 
     // Set the value of the _order fields on submit.
     $('.inline-group').closest("form").submit(function() {
-        // Try to save TinyMCE instances (in case there are some in the inlines)
         if (typeof tinyMCE != 'undefined') {
-            try {
-                tinyMCE.triggerSave();
-            } catch (e) {
-                console.log("TinyMCE error:", e);
-            }
+            tinyMCE.triggerSave();
         }
         $.each($(parentSelector), function(i, parent) {
             var order = 0;

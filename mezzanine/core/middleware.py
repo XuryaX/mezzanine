@@ -21,12 +21,11 @@ from mezzanine.core.management.commands.createdb import (DEFAULT_USERNAME,
 from mezzanine.utils.cache import (cache_key_prefix, nevercache_token,
                                    cache_get, cache_set, cache_installed)
 from mezzanine.utils.device import templates_for_device
-from mezzanine.utils.deprecation import MiddlewareMixin, MIDDLEWARE_SETTING
 from mezzanine.utils.sites import current_site_id, templates_for_host
 from mezzanine.utils.urls import next_url
 
 
-class AdminLoginInterfaceSelectorMiddleware(MiddlewareMixin):
+class AdminLoginInterfaceSelectorMiddleware(object):
     """
     Checks for a POST from the admin login view and if authentication is
     successful and the "site" interface is selected, redirect to the site.
@@ -54,7 +53,7 @@ class AdminLoginInterfaceSelectorMiddleware(MiddlewareMixin):
         return None
 
 
-class SitePermissionMiddleware(MiddlewareMixin):
+class SitePermissionMiddleware(object):
     """
     Marks the current user with a ``has_site_permission`` which is
     used in place of ``user.is_staff`` to achieve per-site staff
@@ -80,7 +79,7 @@ class SitePermissionMiddleware(MiddlewareMixin):
         request.user.has_site_permission = has_site_permission
 
 
-class TemplateForDeviceMiddleware(MiddlewareMixin):
+class TemplateForDeviceMiddleware(object):
     """
     Inserts device-specific templates to the template list.
     """
@@ -93,7 +92,7 @@ class TemplateForDeviceMiddleware(MiddlewareMixin):
         return response
 
 
-class TemplateForHostMiddleware(MiddlewareMixin):
+class TemplateForHostMiddleware(object):
     """
     Inserts host-specific templates to the template list.
     """
@@ -105,7 +104,7 @@ class TemplateForHostMiddleware(MiddlewareMixin):
         return response
 
 
-class UpdateCacheMiddleware(MiddlewareMixin):
+class UpdateCacheMiddleware(object):
     """
     Response phase for Mezzanine's cache middleware. Handles caching
     the response, and then performing the second phase of rendering,
@@ -178,14 +177,14 @@ class UpdateCacheMiddleware(MiddlewareMixin):
         # that if there was a {% csrf_token %} inside of the nevercache
         # the cookie will be correctly set for the the response
         csrf_mw_name = "django.middleware.csrf.CsrfViewMiddleware"
-        if csrf_mw_name in MIDDLEWARE_SETTING:
+        if csrf_mw_name in settings.MIDDLEWARE_CLASSES:
             response.csrf_processing_done = False
             csrf_mw = CsrfViewMiddleware()
             csrf_mw.process_response(request, response)
         return response
 
 
-class FetchFromCacheMiddleware(MiddlewareMixin):
+class FetchFromCacheMiddleware(object):
     """
     Request phase for Mezzanine cache middleware. Return a response
     from cache if found, othwerwise mark the request for updating
@@ -201,7 +200,7 @@ class FetchFromCacheMiddleware(MiddlewareMixin):
             # won't receieve one on their first request, with cache
             # middleware running.
             csrf_mw_name = "django.middleware.csrf.CsrfViewMiddleware"
-            if csrf_mw_name in MIDDLEWARE_SETTING:
+            if csrf_mw_name in settings.MIDDLEWARE_CLASSES:
                 csrf_mw = CsrfViewMiddleware()
                 csrf_mw.process_view(request, lambda x: None, None, None)
                 get_token(request)
@@ -211,7 +210,7 @@ class FetchFromCacheMiddleware(MiddlewareMixin):
                 return HttpResponse(response)
 
 
-class SSLRedirectMiddleware(MiddlewareMixin):
+class SSLRedirectMiddleware(object):
     """
     Handles redirections required for SSL when ``SSL_ENABLED`` is ``True``.
 
@@ -259,14 +258,13 @@ class SSLRedirectMiddleware(MiddlewareMixin):
         return response
 
 
-class RedirectFallbackMiddleware(MiddlewareMixin):
+class RedirectFallbackMiddleware(object):
     """
     Port of Django's ``RedirectFallbackMiddleware`` that uses
     Mezzanine's approach for determining the current site.
     """
 
-    def __init__(self, *args, **kwargs):
-        super(RedirectFallbackMiddleware, self).__init__(*args, **kwargs)
+    def __init__(self):
         if "django.contrib.redirects" not in settings.INSTALLED_APPS:
             raise MiddlewareNotUsed
 
